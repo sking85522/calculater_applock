@@ -27,6 +27,7 @@
         android:layout_marginTop="32dp">
 
         <Button
+            android:id="@+id/btn_photos"
             android:layout_width="0dp"
             android:layout_height="100dp"
             android:layout_columnWeight="1"
@@ -36,6 +37,7 @@
             android:textColor="@color/white" />
 
         <Button
+            android:id="@+id/btn_videos"
             android:layout_width="0dp"
             android:layout_height="100dp"
             android:layout_columnWeight="1"
@@ -45,6 +47,7 @@
             android:textColor="@color/white" />
 
         <Button
+            android:id="@+id/btn_documents"
             android:layout_width="0dp"
             android:layout_height="100dp"
             android:layout_columnWeight="1"
@@ -54,6 +57,7 @@
             android:textColor="@color/white" />
 
         <Button
+            android:id="@+id/btn_applock"
             android:layout_width="0dp"
             android:layout_height="100dp"
             android:layout_columnWeight="1"
@@ -63,6 +67,7 @@
             android:textColor="@color/white" />
 
         <Button
+            android:id="@+id/btn_settings"
             android:layout_width="0dp"
             android:layout_height="100dp"
             android:layout_columnWeight="1"

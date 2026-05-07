@@ -32,7 +32,16 @@ class PreferenceManager(context: Context) {
         return savedPin == pin
     }
 
+    fun isFingerprintEnabled(): Boolean {
+        return sharedPreferences.getBoolean(KEY_FINGERPRINT_ENABLED, false)
+    }
+
+    fun setFingerprintEnabled(enabled: Boolean) {
+        sharedPreferences.edit().putBoolean(KEY_FINGERPRINT_ENABLED, enabled).apply()
+    }
+
     companion object {
         private const val KEY_SECRET_PIN = "key_secret_pin"
+        private const val KEY_FINGERPRINT_ENABLED = "key_fingerprint_enabled"
     }
 }

@@ -4,8 +4,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
 import com.calcvault.app.utils.PreferenceManager
+import java.util.concurrent.Executor
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,6 +28,39 @@ class MainActivity : AppCompatActivity() {
         tvDisplay = findViewById(R.id.tv_display)
 
         setupButtons()
+        checkBiometricUnlock()
+    }
+
+    private fun checkBiometricUnlock() {
+        if (preferenceManager.isFingerprintEnabled()) {
+            val executor = ContextCompat.getMainExecutor(this)
+            val biometricPrompt = BiometricPrompt(this, executor,
+                object : BiometricPrompt.AuthenticationCallback() {
+                    override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                        super.onAuthenticationError(errorCode, errString)
+                        // Ignore error, fallback to PIN is natural because calc remains open
+                    }
+
+                    override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                        super.onAuthenticationSucceeded(result)
+                        Toast.makeText(applicationContext, "Authentication succeeded!", Toast.LENGTH_SHORT).show()
+                        openVault()
+                    }
+
+                    override fun onAuthenticationFailed() {
+                        super.onAuthenticationFailed()
+                        Toast.makeText(applicationContext, "Authentication failed", Toast.LENGTH_SHORT).show()
+                    }
+                })
+
+            val promptInfo = BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Unlock Vault")
+                .setSubtitle("Use your fingerprint to access the vault")
+                .setNegativeButtonText("Use Calculator PIN")
+                .build()
+
+            biometricPrompt.authenticate(promptInfo)
+        }
     }
 
     private fun setupButtons() {
