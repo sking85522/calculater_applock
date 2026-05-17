@@ -23,8 +23,26 @@ class PhotoAdapter(private val context: Context, private val photos: List<File>)
     // Used to track jobs so we can cancel them when views are recycled
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
-    class PhotoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class PhotoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val imageView: ImageView = view.findViewById(R.id.iv_hidden_photo)
+
+        init {
+            view.setOnLongClickListener {
+                val file = photos[adapterPosition]
+                val builder = androidx.appcompat.app.AlertDialog.Builder(context)
+                builder.setTitle("Delete")
+                builder.setMessage("Move this item to Trash?")
+                builder.setPositiveButton("Yes") { _, _ ->
+                    com.calcvault.app.utils.TrashManager.moveToTrash(context, file)
+                    if (context is PhotoVaultActivity) {
+                        context.loadHiddenPhotos()
+                    }
+                }
+                builder.setNegativeButton("No", null)
+                builder.show()
+                true
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoViewHolder {

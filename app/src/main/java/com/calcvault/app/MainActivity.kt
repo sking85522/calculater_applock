@@ -5,9 +5,13 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import android.Manifest
+import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricPrompt
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.calcvault.app.utils.CameraHelper
 import com.calcvault.app.utils.PreferenceManager
 import java.util.concurrent.Executor
 
@@ -29,6 +33,10 @@ class MainActivity : AppCompatActivity() {
 
         setupButtons()
         checkBiometricUnlock()
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 101)
+        }
     }
 
     private fun checkBiometricUnlock() {
@@ -90,17 +98,33 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_eq).setOnClickListener { calculateResult() }
     }
 
+    private var isNewOperation = true
+
     private fun appendInput(value: String) {
+        if (isNewOperation) {
+            currentInput = ""
+            isNewOperation = false
+        }
         if (value == "." && currentInput.contains(".")) return
-        currentInput += value
+
+        // Don't allow multiple leading zeros
+        if (currentInput == "0" && value != ".") {
+            currentInput = value
+        } else {
+            currentInput += value
+        }
         tvDisplay.text = currentInput
     }
 
     private fun setOp(op: String) {
         if (currentInput.isNotEmpty()) {
+            if (operator.isNotEmpty() && !isNewOperation) {
+                // Calculate intermediate result before setting new operator
+                calculateResult(isIntermediate = true)
+            }
             firstOperand = currentInput.toDoubleOrNull() ?: 0.0
             operator = op
-            currentInput = ""
+            isNewOperation = true
         }
     }
 
@@ -108,26 +132,55 @@ class MainActivity : AppCompatActivity() {
         currentInput = ""
         operator = ""
         firstOperand = 0.0
+        isNewOperation = true
         tvDisplay.text = "0"
     }
 
     private fun deleteLast() {
         if (currentInput.isNotEmpty()) {
             currentInput = currentInput.dropLast(1)
-            tvDisplay.text = if (currentInput.isEmpty()) "0" else currentInput
+            if (currentInput.isEmpty() || currentInput == "-") {
+                currentInput = "0"
+                isNewOperation = true
+            }
+            tvDisplay.text = currentInput
         }
     }
 
-    private fun calculateResult() {
-        // --- SECRET VAULT CHECK ---
-        // If the user enters the PIN and presses =, open Vault
-        if (preferenceManager.verifyPin(currentInput)) {
-            openVault()
-            return
+    private var wrongPinAttempts = 0
+
+    private fun calculateResult(isIntermediate: Boolean = false) {
+        // --- SECRET VAULT CHECK (Only when user explicitly hits '=' without pending math, or if it exactly matches) ---
+        // We only consider it a PIN attempt if it looks like a PIN (length 4+), no decimal, and '=' is pressed.
+        if (!isIntermediate && currentInput.length >= 4 && !currentInput.contains(".")) {
+            if (preferenceManager.verifyPin(currentInput)) {
+                wrongPinAttempts = 0
+                openVault(isFake = false)
+                return
+            } else if (preferenceManager.verifyFakePin(currentInput)) {
+                wrongPinAttempts = 0
+                openVault(isFake = true)
+                return
+            } else {
+                // It was a pure number entry without an operator, and it failed the PIN check.
+                // We track it as a wrong attempt, but we still display it.
+                if (operator.isEmpty()) {
+                    wrongPinAttempts++
+                    if (wrongPinAttempts >= 3) {
+                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                            CameraHelper(this).takeIntruderSelfie()
+                        }
+                        showFakeCrash()
+                        wrongPinAttempts = 0 // Reset after crash
+                        clear()
+                        return
+                    }
+                }
+            }
         }
 
         // --- NORMAL CALCULATION ---
-        if (currentInput.isEmpty() || operator.isEmpty()) return
+        if (operator.isEmpty() || isNewOperation) return
 
         val secondOperand = currentInput.toDoubleOrNull() ?: 0.0
         var result = 0.0
@@ -136,23 +189,46 @@ class MainActivity : AppCompatActivity() {
             "+" -> result = firstOperand + secondOperand
             "-" -> result = firstOperand - secondOperand
             "*" -> result = firstOperand * secondOperand
-            "/" -> if (secondOperand != 0.0) result = firstOperand / secondOperand
+            "/" -> if (secondOperand != 0.0) result = firstOperand / secondOperand else {
+                Toast.makeText(this, "Cannot divide by zero", Toast.LENGTH_SHORT).show()
+                clear()
+                return
+            }
             "%" -> result = (firstOperand / 100) * secondOperand
         }
 
         // Format to remove .0 if integer
-        val resultStr = if (result % 1 == 0.0) result.toInt().toString() else result.toString()
+        val resultStr = if (result % 1 == 0.0) result.toLong().toString() else result.toString()
 
         tvDisplay.text = resultStr
         currentInput = resultStr
-        operator = ""
+
+        if (!isIntermediate) {
+            operator = ""
+        }
+        isNewOperation = true
     }
 
-    private fun openVault() {
+    private fun openVault(isFake: Boolean = false) {
         currentInput = ""
         tvDisplay.text = "0"
         operator = ""
         firstOperand = 0.0
-        startActivity(Intent(this, com.calcvault.app.ui.vault.VaultDashboardActivity::class.java))
+
+        val intent = Intent(this, com.calcvault.app.ui.vault.VaultDashboardActivity::class.java)
+        intent.putExtra("IS_FAKE_VAULT", isFake)
+        startActivity(intent)
+    }
+
+    private fun showFakeCrash() {
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+        builder.setTitle("Calculator")
+        builder.setMessage("Unfortunately, Calculator has stopped.")
+        builder.setPositiveButton("OK") { dialog, _ ->
+            dialog.dismiss()
+            finish() // Close the app
+        }
+        builder.setCancelable(false)
+        builder.show()
     }
 }

@@ -37,12 +37,12 @@
             android:textColor="@color/white" />
 
         <Button
-            android:id="@+id/btn_videos"
+            android:id="@+id/btn_browser"
             android:layout_width="0dp"
             android:layout_height="100dp"
             android:layout_columnWeight="1"
             android:layout_margin="8dp"
-            android:text="Videos"
+            android:text="Browser"
             app:backgroundTint="@color/btn_eq"
             android:textColor="@color/white" />
 
@@ -52,7 +52,17 @@
             android:layout_height="100dp"
             android:layout_columnWeight="1"
             android:layout_margin="8dp"
-            android:text="Documents"
+            android:text="File Manager"
+            app:backgroundTint="@color/btn_eq"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/btn_notes"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:text="Secure Notes"
             app:backgroundTint="@color/btn_eq"
             android:textColor="@color/white" />
 
@@ -73,6 +83,36 @@
             android:layout_columnWeight="1"
             android:layout_margin="8dp"
             android:text="Settings"
+            app:backgroundTint="@color/btn_eq"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/btn_trash"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:text="Recycle Bin"
+            app:backgroundTint="@color/btn_eq"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/btn_sync"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:text="PC Sync"
+            app:backgroundTint="@color/btn_eq"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/btn_backup"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:text="Cloud Backup"
             app:backgroundTint="@color/btn_eq"
             android:textColor="@color/white" />
 

@@ -7,16 +7,16 @@ import android.os.Bundle
 import android.provider.OpenableColumns
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.calcvault.app.R
+import com.calcvault.app.ui.base.BaseVaultActivity
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKey
 import java.io.File
 
-class PhotoVaultActivity : AppCompatActivity() {
+class PhotoVaultActivity : BaseVaultActivity() {
 
     private lateinit var recyclerPhotos: RecyclerView
     private lateinit var photoAdapter: PhotoAdapter
@@ -44,9 +44,14 @@ class PhotoVaultActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadHiddenPhotos() {
+    private fun getStorageDirName(): String {
+        val isFake = intent.getBooleanExtra("IS_FAKE_VAULT", false)
+        return if (isFake) "fake_hidden_photos" else "hidden_photos"
+    }
+
+    fun loadHiddenPhotos() {
         hiddenPhotos.clear()
-        val dir = File(filesDir, "hidden_photos")
+        val dir = File(filesDir, getStorageDirName())
         if (dir.exists()) {
             dir.listFiles()?.let { files ->
                 hiddenPhotos.addAll(files)
@@ -64,7 +69,7 @@ class PhotoVaultActivity : AppCompatActivity() {
 
     private fun hidePhoto(uri: Uri) {
         try {
-            val dir = File(filesDir, "hidden_photos")
+            val dir = File(filesDir, getStorageDirName())
             if (!dir.exists()) dir.mkdirs()
 
             val fileName = getFileName(uri) ?: "hidden_img_${System.currentTimeMillis()}.jpg"

@@ -43,6 +43,35 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:text="Dark Mode App Lock"
+                android:textSize="18sp" />
+
+            <Switch
+                android:id="@+id/switch_dark_mode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_set_fake_pin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Set Fake / Decoy PIN"
+            android:layout_marginBottom="16dp"
+            app:backgroundTint="@color/btn_op"
+            android:textColor="@color/black" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="Fingerprint Unlock"
                 android:textSize="18sp" />
 
@@ -51,6 +80,24 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_disguise_icon"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Disguise App Icon (Weather)"
+            android:layout_marginBottom="16dp"
+            app:backgroundTint="@color/btn_op"
+            android:textColor="@color/black" />
+
+        <Button
+            android:id="@+id/btn_stealth_mode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Enable Stealth Mode (Dialer: *#*#1234#*#*)"
+            android:layout_marginBottom="16dp"
+            app:backgroundTint="@color/btn_op"
+            android:textColor="@color/black" />
 
     </LinearLayout>
 
